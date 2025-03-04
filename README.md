@@ -1,90 +1,92 @@
 # Servidor Postgres Dockerizado
+**Requisitos**: Debes de tener instalado docker en tu máquina.
 
-**Este repositorio tiene la estructura:**
+### Utilería para desplegar un servidor postgresql en un contenedor docker.
 
-<div style=" display: flex; flex-direction: row;align-items: center;">
- <img src="image.png" alt="alt text" width="20" height="20">
- <span style="font-size: 16px; margin-left:10px;font-weight: bold">docker-postgres:</span>
- <span style="font-size: 16px; margin-left:5px">
- Es la raíz del espacio de trabajo.
-</span>
-</div>
+**Descripción**: El servidor se inicializará con una base de datos llamada: **mydatabase** con una tabla **users** con **5 registros insertados**.
+
+<br>
+<br>
+
+**Este repositorio tiene las siguientes carpetas y archivos:**
 
 <div style="display: flex; flex-direction: row;align-items: center;">
- <img src="image.png" alt="alt text" width="20" height="20">
+ <img src="assets/image.png" alt="alt text" width="20" height="20">
  <span style="font-size: 16px; margin-left:10px;font-weight: bold">sql:</span>
  <span style="font-size: 16px; margin-left:5px">
- Scripts SQL para poblar la base de datos con tablas y registros de users, cuando el servidor este levantando.
+ Contiene los scripts SQL para poblar la base de datos con tablas y registros de users.
 </span>
 </div>
 
 <div style="display: flex; flex-direction: row;align-items: center; margin-bottom:10px">
- <img src="image-1.png" alt="alt text" width="20" height="20">
+ <img src="assets/image-1.png" alt="alt text" width="20" height="20">
  <span style="font-size: 16px; margin-left:10px;font-weight: bold">deploy.sh:</span>
  <span style="font-size: 16px; margin-left:5px">
  Bash Script para desplegar el servidor.
 </span>
 </div>
 
-### Utileria para desplegar un servidor postgresql en contenedor docker.
-**Requisitos**: Debes de tener instalado docker en tu maquina.
-
-**Descripción**: El servidor se inicializará con una base de datos llamada **mydatabase** junto con una tabla **users** junto con **5 registros insertados**.
-
-**Nota:** Si deseas agregar tablas adicionales o crear nuevos registros,  edita el archivo: **sql/users.sql**
-
-## Como levantar el servicio?
+### ¿Cómo levantar el servicio?
 
 ### Paso 1.- Descargar el repositorio:
 
 ```bash
 # Clonamos el repositorio
-git clone https://github.com/soydvaldez/docker-postgres.git
+git clone https://github.com/soydvaldez/infra.git
 
 # Nos posicionamos sobre la raíz del espacio de trabajo:
-cd docker-postgres/
+cd infra/
 ```
-
+*** 
 ### Paso 2.- Levantar el servicio 
-  - 2.1 Copiando o pegando el comando en la terminal
+  - 2.1 Copia y pega el siguiente comando en tú terminal
   - 2.2 Mediante el script **deploy.sh**
 
-#### 2.1 Copiando o pegando el comando en la terminal
+##### 2.1 Copia y pega el siguiente comando en tú terminal:
 ```bash
-CONTAINER_NAME=db-postgres
-
 docker run \
-  --name ${CONTAINER_NAME} \     # Asigna un nombre al contenedor
+  --name db-postgres \
   -p 5432:5432 \
   -e POSTGRES_USER:postgres \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=mydatabase \
   -v ./sql/users.sql:/docker-entrypoint-initdb.d/users.sql \
   -it --rm \
-  -d \                           # Para levantar en segundo plano
+  -d \
   postgres:17-alpine
 ```
 
-#### 2.2 Mediante el script **deploy.sh**
+##### 2.2 Mediante el script **deploy.sh**:
 
 ```bash
-# Dar privilegios del ejecuccion para el usuario actual:
+# Dará privilegios de ejecuccion para el usuario actual:
 chmod u+x deploy.sh
 
 # Correr el script:
 bash deploy.sh
 ```
-
+***
 ### Paso 3.- Verificamos los logs del servidor para verificar que haya levantado correctamente
 ```bash
- CONTAINER_NAME=db-postgres
- 
- docker logs -f ${CONTAINER_NAME}
+ docker logs -f db-postgres
 ```
 
 Con estos sencillos pasos tendremos un servidor corriendo por el puerto 5432 en localhost
 
-### Paso 4.- Realizamos una conexion con psql (o otro cliente de tu preferencias)
+### Paso 4.- Realizamos una conexión con psql (u otro cliente de tú preferencias)
+```bash 
+ docker exec -it db-postgres psql -U postgres --db=mydatabase   # No requiere password
+```
+
+o usando el cliente psql desde localhost:
+
 ```bash 
  psql -h localhost -U postgres --dbname=mydatabase   # Password: postgres
 ```
+
+### Paso 5.- Listamos las tablas y consultamos los usuarios:
+```sql
+\dt
+select * from users;
+```
+![alt text](assets/consola.png)
